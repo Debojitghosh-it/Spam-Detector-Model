@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Spam Detector</title>
+
+
+    <style>
+        /* =====================================================
+           RESET
+        ===================================================== */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+
+        /* =====================================================
+           BODY
+        ===================================================== */
+
+        body {
+
+            min-height: 100vh;
+
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            color: white;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            padding: 30px;
+
+            overflow-x: hidden;
+
+            background:
+
+                radial-gradient(circle at 15% 20%,
+                    rgba(0, 153, 255, 0.18),
+                    transparent 30%),
+
+                radial-gradient(circle at 85% 80%,
+                    rgba(140, 0, 255, 0.18),
+                    transparent 30%),
+
+                #080b14;
+        }
+
+
+        /* =====================================================
+           GLOWING BACKGROUND
+        ===================================================== */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            width: 450px;
+
+            height: 450px;
+
+            top: -150px;
+
+            left: -150px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(0, 140, 255, 0.18);
+
+            filter: blur(100px);
+
+            z-index: -1;
+
+            animation:
+                moveBlue 8s ease-in-out infinite alternate;
+        }
+
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            width: 450px;
+
+            height: 450px;
+
+            bottom: -150px;
+
+            right: -150px;
+
+            border-radius: 50%;
+
+            background:
+                rgba(150, 0, 255, 0.18);
+
+            filter: blur(100px);
+
+            z-index: -1;
+
+            animation:
+                movePurple 10s ease-in-out infinite alternate;
+        }
+
+
+        @keyframes moveBlue {
+
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(150px,
+                        100px);
+            }
+        }
+
+
+        @keyframes movePurple {
+
+            from {
+                transform: translate(0, 0);
+            }
+
+            to {
+                transform: translate(-120px,
+                        -80px);
+            }
+        }
+
+
+        /* =====================================================
+           MAIN CARD
+        ===================================================== */
+
+        .container {
+
+            width: 100%;
+
+            max-width: 750px;
+
+            padding: 45px;
+
+            border-radius: 25px;
+
+            background:
+                rgba(18, 23, 37, 0.78);
+
+            border:
+                1px solid rgba(255, 255, 255, 0.12);
+
+            backdrop-filter:
+                blur(20px);
+
+            -webkit-backdrop-filter:
+                blur(20px);
+
+            box-shadow:
+
+                0 25px 80px rgba(0, 0, 0, 0.45),
+
+                inset 0 0 30px rgba(255, 255, 255, 0.02);
+
+            animation:
+                cardAppear 0.8s ease;
+        }
+
+
+        @keyframes cardAppear {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    translateY(30px) scale(0.96);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    translateY(0) scale(1);
+            }
+        }
+
+
+        /* =====================================================
+           SHIELD ICON
+        ===================================================== */
+
+        .icon {
+
+            text-align: center;
+
+            font-size: 60px;
+
+            margin-bottom: 12px;
+
+            animation:
+                shieldPulse 2s infinite;
+        }
+
+
+        @keyframes shieldPulse {
+
+            0%,
+            100% {
+
+                transform:
+                    scale(1);
+
+                filter:
+                    drop-shadow(0 0 5px rgba(0, 170, 255, 0.4));
+            }
+
+            50% {
+
+                transform:
+                    scale(1.08);
+
+                filter:
+                    drop-shadow(0 0 25px rgba(0, 170, 255, 0.9));
+            }
+        }
+
+
+        /* =====================================================
+           TITLE
+        ===================================================== */
+
+        h1 {
+
+            text-align: center;
+
+            font-size: 38px;
+
+            letter-spacing: 1px;
+
+            background:
+
+                linear-gradient(90deg,
+                    #ffffff,
+                    #5ecbff,
+                    #b86cff,
+                    #ffffff);
+
+            background-size: 300%;
+
+            background-clip: text;
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+
+            animation:
+                gradientText 5s linear infinite;
+        }
+
+
+        @keyframes gradientText {
+
+            0% {
+                background-position: 0%;
+            }
+
+            100% {
+                background-position: 300%;
+            }
+        }
+
+
+        /* =====================================================
+           SUBTITLE
+        ===================================================== */
+
+        .subtitle {
+
+            text-align: center;
+
+            color: #9da7bb;
+
+            margin-top: 10px;
+
+            margin-bottom: 35px;
+
+            font-size: 15px;
+        }
+
+
+        /* =====================================================
+           INPUT LABEL
+        ===================================================== */
+
+        .input-label {
+
+            display: block;
+
+            margin-bottom: 10px;
+
+            color: #cbd5e1;
+
+            font-size: 14px;
+
+            font-weight: 600;
+        }
+
+
+        /* =====================================================
+           TEXTAREA
+        ===================================================== */
+
+        .input-wrapper {
+
+            position: relative;
+        }
+
+
+        textarea {
+
+            width: 100%;
+
+            min-height: 200px;
+
+            resize: vertical;
+
+            padding: 20px;
+
+            padding-bottom: 45px;
+
+            border-radius: 17px;
+
+            border:
+                1px solid rgba(255, 255, 255, 0.12);
+
+            outline: none;
+
+            background:
+                rgba(5, 8, 16, 0.75);
+
+            color: white;
+
+            font-size: 16px;
+
+            line-height: 1.6;
+
+            font-family:
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            transition:
+                all 0.3s ease;
+
+            box-shadow:
+                inset 0 0 20px rgba(0, 0, 0, 0.25);
+        }
+
+
+        textarea::placeholder {
+
+            color: #667085;
+        }
+
+
+        textarea:hover {
+
+            border-color:
+                rgba(80, 170, 255, 0.35);
+        }
+
+
+        textarea:focus {
+
+            border-color:
+                #28a9ff;
+
+            background:
+                rgba(8, 14, 25, 0.95);
+
+            box-shadow:
+
+                0 0 5px rgba(40, 169, 255, 0.9),
+
+                0 0 25px rgba(40, 169, 255, 0.25),
+
+                inset 0 0 20px rgba(40, 169, 255, 0.04);
+        }
+
+
+        /* =====================================================
+           CHARACTER COUNTER
+        ===================================================== */
+
+        .counter {
+
+            position: absolute;
+
+            right: 15px;
+
+            bottom: 12px;
+
+            color: #687386;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           BUTTON
+        ===================================================== */
+
+        button {
+
+            width: 100%;
+
+            margin-top: 20px;
+
+            padding: 16px;
+
+            border: none;
+
+            border-radius: 13px;
+
+            cursor: pointer;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            letter-spacing: 0.5px;
+
+            background:
+
+                linear-gradient(90deg,
+                    #008cff,
+                    #7b2cff);
+
+            box-shadow:
+
+                0 0 15px rgba(0, 140, 255, 0.3);
+
+            transition:
+                all 0.3s ease;
+
+            position: relative;
+
+            overflow: hidden;
+        }
+
+
+        button:hover {
+
+            transform:
+                translateY(-3px);
+
+            box-shadow:
+
+                0 0 12px rgba(0, 140, 255, 0.8),
+
+                0 0 35px rgba(123, 44, 255, 0.5);
+        }
+
+
+        button:active {
+
+            transform:
+                scale(0.98);
+        }
+
+
+        /* Button shine animation */
+
+        button::before {
+
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+
+            left: -120%;
+
+            width: 60%;
+
+            height: 100%;
+
+            background:
+
+                linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.3),
+                    transparent);
+
+            transform:
+                skewX(-20deg);
+
+            transition:
+                0.7s;
+        }
+
+
+        button:hover::before {
+
+            left: 130%;
+        }
+
+
+        /* =====================================================
+           RESULT BOX
+        ===================================================== */
+
+        .result-box {
+
+            margin-top: 25px;
+
+            padding: 22px;
+
+            border-radius: 17px;
+
+            text-align: center;
+
+            animation:
+                resultAppear 0.5s ease;
+        }
+
+
+        @keyframes resultAppear {
+
+            from {
+
+                opacity: 0;
+
+                transform:
+                    scale(0.94);
+            }
+
+            to {
+
+                opacity: 1;
+
+                transform:
+                    scale(1);
+            }
+        }
+
+
+        /* SPAM */
+
+        .spam {
+
+            background:
+                rgba(255, 50, 70, 0.12);
+
+            border:
+                1px solid rgba(255, 50, 70, 0.55);
+
+            color:
+                #ff6b7a;
+
+            box-shadow:
+
+                0 0 25px rgba(255, 50, 70, 0.15);
+        }
+
+
+        /* HAM */
+
+        .ham {
+
+            background:
+                rgba(0, 220, 130, 0.10);
+
+            border:
+                1px solid rgba(0, 220, 130, 0.5);
+
+            color:
+                #5dffb0;
+
+            box-shadow:
+
+                0 0 25px rgba(0, 220, 130, 0.12);
+        }
+
+
+        .result-title {
+
+            font-size: 20px;
+
+            font-weight: 700;
+        }
+
+
+        .confidence {
+
+            margin-top: 10px;
+
+            color: #c5ccda;
+
+            font-size: 14px;
+        }
+
+
+        /* =====================================================
+           ERROR
+        ===================================================== */
+
+        .error {
+
+            margin-top: 20px;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            text-align: center;
+
+            color: #ff8b9a;
+
+            background:
+                rgba(255, 50, 70, 0.10);
+
+            border:
+                1px solid rgba(255, 50, 70, 0.3);
+        }
+
+
+        /* =====================================================
+           FOOTER
+        ===================================================== */
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 25px;
+
+            color: #687386;
+
+            font-size: 12px;
+        }
+
+
+        /* =====================================================
+           MOBILE
+        ===================================================== */
+
+        @media (max-width: 600px) {
+
+            body {
+
+                padding: 15px;
+            }
+
+
+            .container {
+
+                padding: 28px 20px;
+
+                border-radius: 20px;
+            }
+
+
+            h1 {
+
+                font-size: 29px;
+            }
+
+
+            .icon {
+
+                font-size: 50px;
+            }
+
+
+            textarea {
+
+                min-height: 170px;
+
+                font-size: 15px;
+            }
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         MAIN CARD
+    ===================================================== -->
+
+    <div class="container">
+
+
+        <!-- ICON -->
+
+        <div class="icon">
+            🛡️
+        </div>
+
+
+        <!-- TITLE -->
+
+        <h1>
+            AI Spam Detector
+        </h1>
+
+
+        <!-- SUBTITLE -->
+
+        <div class="subtitle">
+
+            Intelligent message analysis
+            powered by Machine Learning
+
+        </div>
+
+
+        <!-- FORM -->
+
+        <form method="POST" action="/predict-ui">
+
+
+            <label class="input-label" for="message">
+
+                Enter your message
+
+            </label>
+
+
+            <div class="input-wrapper">
+
+
+                <textarea id="message" name="email_text" maxlength="5000"
+                    placeholder="Paste your email or SMS message here..." required>{{ message|default('') }}</textarea>
+
+
+                <div class="counter">
+
+                    <span id="count">0</span>
+                    / 5000
+
+                </div>
+
+
+            </div>
+
+
+            <!-- BUTTON -->
+
+            <button type="submit">
+
+                🔍 Analyze Message
+
+            </button>
+
+
+        </form>
+
+
+        <!-- =================================================
+             RESULT
+        ================================================== -->
+
+        {% if result %}
+
+        <div class="result-box {{ result_class }}">
+
+            <div class="result-title">
+
+                {{ result }}
+
+            </div>
+
+
+            <div class="confidence">
+
+                Confidence:
+                <strong>
+                    {{ confidence }}%
+                </strong>
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- ERROR -->
+
+        {% if error %}
+
+        <div class="error">
+
+            ⚠️ {{ error }}
+
+        </div>
+
+        {% endif %}
+
+
+        <!-- FOOTER -->
+
+        <div class="footer">
+
+            🔐 AI-powered spam classification
+
+        </div>
+
+
+    </div>
+
+
+    <!-- =====================================================
+         JAVASCRIPT
+    ===================================================== -->
+
+    <script>
+
+        const message =
+            document.getElementById("message");
+
+        const count =
+            document.getElementById("count");
+
+
+        function updateCounter() {
+
+            count.textContent =
+                message.value.length;
+
+        }
+
+
+        message.addEventListener(
+            "input",
+            updateCounter
+        );
+
+
+        updateCounter();
+
+    </script>
+
+
+</body>
+
+</html>
