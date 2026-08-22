@@ -1,5 +1,5 @@
 import joblib
-from flask import Flask, jsonify, render_template_string, request
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
@@ -7,42 +7,10 @@ app = Flask(__name__)
 model = joblib.load("logistic_spam_model.pkl")
 vectorizer = joblib.load("tfidf_vectorizer.pkl")
 
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Email Spam Detector</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 650px; margin: 40px auto; padding: 20px; line-height: 1.6; }
-        textarea { width: 100%; height: 130px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; box-sizing: border-box; }
-        button { background-color: #0066cc; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 15px; margin-top: 10px; }
-        button:hover { background-color: #0052a3; }
-        .result-box { margin-top: 25px; padding: 15px; border-radius: 6px; font-size: 1.1em; }
-        .spam { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .ham { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-    </style>
-</head>
-<body>
-    <h2>📩 Email / SMS Spam Detector</h2>
-    <form method="POST" action="/predict-ui">
-        <textarea name="email_text" placeholder="Paste email or message text here..." required></textarea><br>
-        <button type="submit">Analyze Content</button>
-    </form>
-    {% if result %}
-        <div class="result-box {{ result_class }}">
-            <strong>Prediction:</strong> {{ result }}<br>
-            <strong>Confidence:</strong> {{ confidence }}%
-        </div>
-    {% endif %}
-</body>
-</html>
-"""
-
 
 @app.route("/", methods=["GET"])
 def home():
-    return render_template_string(HTML_TEMPLATE)
+    return render_template("index.html")
 
 
 @app.route("/predict-ui", methods=["POST"])
