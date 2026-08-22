@@ -45,7 +45,7 @@ def predict_ui():
         result_class = "spam"
         confidence = round(float(probs[1]) * 100, 2)
     else:
-        result = "LEGITIMATE (Ham) ✅"
+        result = "The Email is valid ✅"
         result_class = "ham"
         confidence = round(float(probs[0]) * 100, 2)
 
